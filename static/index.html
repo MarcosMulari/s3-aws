@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AWS S3 Presigned URLs - Estudos</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>🚀 AWS S3 Presigned URLs</h1>
+        <p>Estudos sobre upload e visualização de imagens</p>
+    </header>
+
+    <main>
+        <div class="container">
+            <!-- Seção de Upload -->
+            <section class="upload-section">
+                <h2>📤 Upload de Imagem</h2>
+                <div class="upload-area" id="uploadArea">
+                    <input type="file" id="fileInput" accept="image/*" />
+                    <div class="upload-text">
+                        <p>Clique para selecionar uma imagem ou arraste aqui</p>
+                        <small>Formatos aceitos: JPG, PNG, GIF (máx. 10MB)</small>
+                    </div>
+                </div>
+                <button id="uploadBtn" disabled>Fazer Upload</button>
+                <div id="uploadProgress" class="progress-container" style="display: none;">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <span id="progressText">0%</span>
+                </div>
+            </section>
+
+            <!-- Seção de Galeria -->
+            <section class="gallery-section">
+                <h2>🖼️ Galeria de Imagens</h2>
+                <div class="gallery-controls">
+                    <button id="refreshBtn">🔄 Atualizar</button>
+                    <span id="imageCount">0 imagens</span>
+                </div>
+                <div id="gallery" class="gallery-grid">
+                    <!-- Imagens serão carregadas dinamicamente -->
+                </div>
+            </section>
+
+            <!-- Seção de Logs -->
+            <section class="logs-section">
+                <h2>📋 Logs de Atividade</h2>
+                <div id="logs" class="logs-container">
+                    <p class="log-item info">Sistema iniciado - pronto para upload</p>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer>
+        <p>Estudos AWS S3 • Presigned URLs com Signature V4</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
