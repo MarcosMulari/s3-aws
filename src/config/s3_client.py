@@ -2,7 +2,7 @@ import boto3
 from botocore.config import Config
 import os
 
-class S3Config:
+class S3Client:
     """Configurações para o cliente S3 da AWS"""
     def __init__(self):
         self.bucket_name = os.getenv("S3_BUCKET_NAME", "not-configured")
@@ -11,7 +11,7 @@ class S3Config:
         self.aws_secret_access_key = os.getenv("AWS_SECRET_ACCESS_KEY", "not-configured")
         self.signature_version = 's3v4'
         self.endpoint_url = os.getenv("S3_ENDPOINT_URL")
-        
+
     def get_client(self):
         """Cria e retorna um cliente S3 configurado"""
         s3_client = boto3.client(
@@ -26,6 +26,7 @@ class S3Config:
             )
         )
         return s3_client
+    
         
 
 
