@@ -63,7 +63,9 @@ async def api_info():
             "health": "/health",
             "api_health": "/api/health",
             "presigned_post": "/api/presigned-post",
-            "upload_file": "/api/upload-file"
+            "upload_file": "/api/upload-file",
+            "list_files": "/api/files",
+            "view_url": "/api/view-url/{object_key}"
         },
         "configuration": {
             "aws_region": os.getenv("AWS_REGION", "not-configured"),

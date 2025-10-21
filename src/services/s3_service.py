@@ -18,7 +18,8 @@ class S3Service:
          object_name, fields=None, conditions=None, expiration=3600):
         """Generate a presigned URL S3 POST request to upload a file
 
-        :param object_name: string - Nome do objeto no S3
+        :param bucket_name: string
+        :param object_name: string
         :param fields: Dictionary of prefilled form fields
         :param conditions: List of conditions to include in the policy
         :param expiration: Time in seconds for the presigned URL to remain valid
@@ -27,37 +28,21 @@ class S3Service:
             fields: Dictionary of form fields and values to submit with the POST
         :return: None if error.
         """
-        bucket_name = self.bucket_name
-
-        # Condições padrão para o upload
-        if conditions is None:
-            conditions = []
-        
-        # Adiciona condições essenciais
-        conditions.extend([
-            ["content-length-range", 1, 10485760],  # 1 byte a 10MB
-        ])
-
-        # Campos padrão
-        if fields is None:
-            fields = {}
+        bucket_name=self.bucket_name
 
         try:
             response = self.client.generate_presigned_post(
-                Bucket=bucket_name,
-                Key=object_name,
+                bucket_name,
+                object_name,
                 Fields=fields,
                 Conditions=conditions,
                 ExpiresIn=expiration,
             )
-            
-            # Log para debug
-            logging.info(f"Presigned POST gerado para: {object_name}")
-            return response
-            
         except ClientError as e:
-            logging.error(f"Erro ao gerar presigned POST: {e}")
+            logging.error(e)
             return None
+        
+        return response
     def post_file(self, presigned_post_data, file_path):
         """Upload a file to S3 using a presigned POST URL
 
@@ -73,3 +58,59 @@ class S3Service:
                 files=files
             )
         return response.status_code == 204
+
+    def get_all(self, prefix="", max_keys=1000):
+        """Lista todos os objetos do bucket S3
+        
+        :param prefix: Prefixo para filtrar objetos (ex: "uploads/")
+        :param max_keys: Número máximo de objetos a retornar
+        :return: Lista de objetos ou None se erro
+        """
+        try:
+            response = self.client.list_objects_v2(
+                Bucket=self.bucket_name,
+                Prefix=prefix,
+                MaxKeys=max_keys
+            )
+            
+            # Se não há objetos no bucket
+            if 'Contents' not in response:
+                return []
+            
+            # Formatar lista de objetos
+            objects = []
+            for obj in response['Contents']:
+                objects.append({
+                    'key': obj['Key'],
+                    'size': obj['Size'],
+                    'last_modified': obj['LastModified'].isoformat(),
+                    'etag': obj['ETag'].strip('"')
+                })
+            
+            logging.info(f"Listados {len(objects)} objetos do bucket {self.bucket_name}")
+            return objects
+            
+        except ClientError as e:
+            logging.error(f"Erro ao listar objetos: {e}")
+            return None
+
+    def generate_presigned_get_url(self, object_key, expiration=3600):
+        """Gera uma URL pré-assinada para visualizar/baixar um objeto
+        
+        :param object_key: Chave do objeto no S3
+        :param expiration: Tempo de expiração em segundos
+        :return: URL pré-assinada ou None se erro
+        """
+        try:
+            response = self.client.generate_presigned_url(
+                'get_object',
+                Params={'Bucket': self.bucket_name, 'Key': object_key},
+                ExpiresIn=expiration
+            )
+            
+            logging.info(f"URL pré-assinada gerada para: {object_key}")
+            return response
+            
+        except ClientError as e:
+            logging.error(f"Erro ao gerar URL pré-assinada: {e}")
+            return None

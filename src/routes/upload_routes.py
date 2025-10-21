@@ -136,6 +136,59 @@ async def upload_file_to_s3(
             detail=f"Erro no upload: {str(e)}"
         )
 
+@router.get("/files")
+async def list_files(prefix: Optional[str] = "uploads/", max_keys: Optional[int] = 100):
+    """
+    Lista todos os arquivos do bucket S3
+    """
+    try:
+        files = s3_service.get_all(prefix=prefix, max_keys=max_keys)
+        
+        if files is None:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao listar arquivos do S3"
+            )
+        
+        return {
+            "files": files,
+            "count": len(files),
+            "bucket": os.getenv("S3_BUCKET_NAME"),
+            "prefix": prefix
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao listar arquivos: {str(e)}"
+        )
+
+@router.get("/view-url/{object_key:path}")
+async def get_view_url(object_key: str, expiration: Optional[int] = 3600):
+    """
+    Gera uma URL pré-assinada para visualizar um arquivo específico
+    """
+    try:
+        view_url = s3_service.generate_presigned_get_url(object_key, expiration)
+        
+        if not view_url:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail="Erro ao gerar URL de visualização"
+            )
+        
+        return {
+            "view_url": view_url,
+            "object_key": object_key,
+            "expires_in": expiration
+        }
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Erro ao gerar URL: {str(e)}"
+        )
+
 @router.get("/health")
 async def health_check():
     """

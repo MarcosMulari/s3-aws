@@ -160,10 +160,79 @@ class S3UploadManager {
 
     async refreshGallery() {
         this.logActivity('Atualizando galeria...', 'info');
-        // TODO: Implementar listagem de objetos do S3
-        // Por enquanto, apenas simula
-        document.getElementById('imageCount').textContent = '0 imagens';
-        this.logActivity('Galeria atualizada', 'info');
+        
+        try {
+            // Lista arquivos do S3
+            const response = await fetch(`${this.apiBase}/files`);
+            if (!response.ok) {
+                throw new Error(`Erro ao carregar galeria: ${response.statusText}`);
+            }
+            
+            const data = await response.json();
+            const files = data.files || [];
+            
+            // Atualiza contador
+            document.getElementById('imageCount').textContent = `${files.length} imagens`;
+            
+            // Atualiza galeria
+            await this.renderGallery(files);
+            
+            this.logActivity(`Galeria atualizada: ${files.length} imagens encontradas`, 'success');
+            
+        } catch (error) {
+            this.logActivity(`Erro ao atualizar galeria: ${error.message}`, 'error');
+            document.getElementById('imageCount').textContent = 'Erro ao carregar';
+        }
+    }
+
+    async renderGallery(files) {
+        const galleryContainer = document.getElementById('gallery');
+        galleryContainer.innerHTML = '';
+        
+        if (files.length === 0) {
+            return; // CSS já mostra "Nenhuma imagem encontrada"
+        }
+        
+        for (const file of files) {
+            try {
+                // Gera URL de visualização
+                const viewResponse = await fetch(`${this.apiBase}/view-url/${encodeURIComponent(file.key)}`);
+                if (!viewResponse.ok) continue;
+                
+                const viewData = await viewResponse.json();
+                
+                // Cria elemento da imagem
+                const imageItem = document.createElement('div');
+                imageItem.className = 'gallery-item';
+                
+                const img = document.createElement('img');
+                img.src = viewData.view_url;
+                img.alt = file.key;
+                img.title = `${file.key}\nTamanho: ${this.formatFileSize(file.size)}\nUpload: ${new Date(file.last_modified).toLocaleString()}`;
+                
+                const info = document.createElement('div');
+                info.className = 'image-info';
+                info.innerHTML = `
+                    <span class="filename">${file.key.split('/').pop()}</span>
+                    <span class="filesize">${this.formatFileSize(file.size)}</span>
+                `;
+                
+                imageItem.appendChild(img);
+                imageItem.appendChild(info);
+                galleryContainer.appendChild(imageItem);
+                
+            } catch (error) {
+                console.error(`Erro ao renderizar ${file.key}:`, error);
+            }
+        }
+    }
+
+    formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
 
     showProgress(percent) {

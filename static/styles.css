@@ -196,6 +196,45 @@ button:disabled {
     padding: 2rem;
 }
 
+.gallery-item {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    background: white;
+}
+
+.gallery-item:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.gallery-item img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.image-info {
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.filename {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #4a5568;
+    word-break: break-all;
+}
+
+.filesize {
+    font-size: 0.75rem;
+    color: #718096;
+}
+
 /* Logs Section */
 .logs-section {
     grid-column: 1 / -1;
