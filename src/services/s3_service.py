@@ -18,8 +18,7 @@ class S3Service:
          object_name, fields=None, conditions=None, expiration=3600):
         """Generate a presigned URL S3 POST request to upload a file
 
-        :param bucket_name: string
-        :param object_name: string
+        :param object_name: string - Nome do objeto no S3
         :param fields: Dictionary of prefilled form fields
         :param conditions: List of conditions to include in the policy
         :param expiration: Time in seconds for the presigned URL to remain valid
@@ -28,21 +27,37 @@ class S3Service:
             fields: Dictionary of form fields and values to submit with the POST
         :return: None if error.
         """
-        bucket_name=self.bucket_name
+        bucket_name = self.bucket_name
+
+        # Condições padrão para o upload
+        if conditions is None:
+            conditions = []
+        
+        # Adiciona condições essenciais
+        conditions.extend([
+            ["content-length-range", 1, 10485760],  # 1 byte a 10MB
+        ])
+
+        # Campos padrão
+        if fields is None:
+            fields = {}
 
         try:
             response = self.client.generate_presigned_post(
-                bucket_name,
-                object_name,
+                Bucket=bucket_name,
+                Key=object_name,
                 Fields=fields,
                 Conditions=conditions,
                 ExpiresIn=expiration,
             )
+            
+            # Log para debug
+            logging.info(f"Presigned POST gerado para: {object_name}")
+            return response
+            
         except ClientError as e:
-            logging.error(e)
+            logging.error(f"Erro ao gerar presigned POST: {e}")
             return None
-        
-        return response
     def post_file(self, presigned_post_data, file_path):
         """Upload a file to S3 using a presigned POST URL
 

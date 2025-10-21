@@ -17,7 +17,7 @@ sys.path.insert(0, str(current_dir))
 load_dotenv()
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 8000))
+    port = int(os.getenv("PORT", 3000))
     host = os.getenv("HOST", "0.0.0.0")
     
     print(f"🚀 Iniciando servidor AWS S3 Presigned URLs")
