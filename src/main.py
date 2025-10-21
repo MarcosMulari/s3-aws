@@ -8,10 +8,15 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 import os
+import sys
+from pathlib import Path
 from dotenv import load_dotenv
 
+# Adiciona o diretório raiz ao path para imports
+sys.path.append(str(Path(__file__).parent.parent))
+
 # Importa as rotas
-from .routes.upload_routes import router as upload_router
+from src.routes.upload_routes import router as upload_router
 
 # Carrega variáveis de ambiente
 load_dotenv()
@@ -76,15 +81,3 @@ async def health_check():
         "aws_region": os.getenv("AWS_REGION", "not-configured"),
         "bucket": os.getenv("S3_BUCKET_NAME", "not-configured")
     }
-
-if __name__ == "__main__":
-    import uvicorn
-    
-    port = int(os.getenv("PORT", 8000))
-    uvicorn.run(
-        "main:app",
-        host="0.0.0.0",
-        port=port,
-        reload=True,
-        reload_dirs=["src"]
-    )

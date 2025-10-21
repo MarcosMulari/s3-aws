@@ -3,14 +3,22 @@ from pydantic import BaseModel
 from typing import Optional, List
 import uuid
 import os
-from ..services.s3_service import S3Service
-from ..config.s3_client import S3Client
+import sys
+from pathlib import Path
+
+# Adiciona o diretório raiz ao path para imports
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
+from src.services.s3_service import S3Service
+from src.config.s3_client import S3Client
 
 router = APIRouter(prefix="/api", tags=["Upload"])
 
 # Inicializa o cliente S3 e serviço
+bucket_name = S3Client().bucket_name
+
 s3_client = S3Client().get_client()
-s3_service = S3Service(s3_client)
+s3_service = S3Service(s3_client, bucket_name)
 
 # Modelos de request/response
 class PresignedPostRequest(BaseModel):

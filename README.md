@@ -114,9 +114,11 @@ copy .env.example .env
 
 5. Execute o projeto:
 ```bash
-python src/main.py
-# ou
-uvicorn src.main:app --reload
+# Método recomendado - usando o script run.py
+python run.py
+
+# Ou usando uvicorn diretamente
+uvicorn src.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 ### Variáveis de Ambiente

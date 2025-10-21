@@ -1,14 +1,18 @@
-from ..config.s3_client import S3Client
+import sys
+from pathlib import Path
 import logging
 from botocore.exceptions import ClientError
 import requests
 
-s3_client = S3Client().get_client()
+# Adiciona o diretório raiz ao path para imports
+sys.path.append(str(Path(__file__).parent.parent.parent))
+
 
 class S3Service:
     """Serviço para operações com S3"""
-    def __init__(self, client):
+    def __init__(self, client, bucket_name):
         self.client = client
+        self.bucket_name = bucket_name
 
     def create_presigned_post(self,
          object_name, fields=None, conditions=None, expiration=3600):
@@ -24,7 +28,7 @@ class S3Service:
             fields: Dictionary of form fields and values to submit with the POST
         :return: None if error.
         """
-        bucket_name=self.client.bucket_name
+        bucket_name=self.bucket_name
 
         try:
             response = self.client.generate_presigned_post(
