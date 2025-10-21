@@ -3,11 +3,15 @@ AWS S3 Presigned URLs - Aplicação Principal
 Estudos sobre upload e download de imagens usando presigned URLs
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 import os
 from dotenv import load_dotenv
+
+# Importa as rotas
+from .routes.upload_routes import router as upload_router
 
 # Carrega variáveis de ambiente
 load_dotenv()
@@ -16,7 +20,9 @@ load_dotenv()
 app = FastAPI(
     title="AWS S3 Presigned URLs",
     description="API para estudos de upload/download com presigned URLs",
-    version="1.0.0"
+    version="1.0.0",
+    docs_url="/docs",
+    redoc_url="/redoc"
 )
 
 # Configuração CORS
@@ -28,12 +34,20 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Inclui as rotas
+app.include_router(upload_router)
+
 # Servir arquivos estáticos
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 @app.get("/")
 async def root():
-    """Endpoint raiz - informações da API"""
+    """Endpoint raiz - redireciona para a interface"""
+    return FileResponse("static/index.html")
+
+@app.get("/info")
+async def api_info():
+    """Endpoint com informações da API"""
     return {
         "message": "AWS S3 Presigned URLs API",
         "version": "1.0.0",
@@ -41,7 +55,15 @@ async def root():
         "endpoints": {
             "docs": "/docs",
             "redoc": "/redoc",
-            "health": "/health"
+            "health": "/health",
+            "api_health": "/api/health",
+            "presigned_post": "/api/presigned-post",
+            "upload_file": "/api/upload-file"
+        },
+        "configuration": {
+            "aws_region": os.getenv("AWS_REGION", "not-configured"),
+            "bucket": os.getenv("S3_BUCKET_NAME", "not-configured"),
+            "port": os.getenv("PORT", "8000")
         }
     }
 

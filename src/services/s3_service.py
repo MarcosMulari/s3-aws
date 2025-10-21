@@ -1,6 +1,7 @@
 from ..config.s3_client import S3Client
 import logging
 from botocore.exceptions import ClientError
+import requests
 
 s3_client = S3Client().get_client()
 
